@@ -24,6 +24,15 @@ CREATE TABLE portfolio_holdings (
     FOREIGN KEY (stock_id) REFERENCES stocks(stock_id)
 );
 
+-- Table to store current market prices for stocks (simulated)
+CREATE TABLE current_prices (
+    price_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stock_id INTEGER NOT NULL UNIQUE,
+    current_price REAL NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (stock_id) REFERENCES stocks(stock_id)
+);
+
 -- Optional: If you want to track users (for a multi-user system)
 -- CREATE TABLE users (
 --     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
