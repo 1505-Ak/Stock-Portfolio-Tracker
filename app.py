@@ -23,7 +23,8 @@ API_CALL_INTERVAL = 15  # seconds (Alpha Vantage free tier is 5 calls/min)
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
+        # Tell sqlite3 to parse declared types and recognize column names for type conversion
+        db = g._database = sqlite3.connect(DATABASE, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         db.row_factory = sqlite3.Row
     return db
 
