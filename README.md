@@ -1,13 +1,16 @@
 # Stock Portfolio Tracker
 
-This project is a SQL-based stock portfolio tracker. It allows users to manage their stock portfolios, track transactions, calculate current valuations, and analyze performance. This project is designed to showcase SQL skills including database schema design, data manipulation (DML), and complex querying for financial analysis.
+This project is a SQL-based stock portfolio tracker with a Flask web interface. It allows users to manage their stock portfolios, track transactions, calculate current valuations with live price updates, and analyze performance.
 
 ## Features
 
+*   Web interface built with Flask, styled with a dark theme.
+*   Portfolio Overview page displaying current holdings, total value, and unrealized P/L.
+*   Transaction History page.
+*   **Automated Current Price Updates:** Integrates with the Alpha Vantage API to fetch and update stock prices.
 *   Track stock purchases and sales via a `transactions` table.
 *   Maintain a list of unique `stocks` with their company names.
 *   Keep a `portfolio_holdings` table reflecting the current quantity and average buy price of owned stocks.
-*   Simulate `current_prices` for stocks to enable market valuation.
 *   Calculate the current market value of individual holdings and the overall portfolio.
 *   Analyze unrealized profit/loss for current holdings.
 *   Estimate realized profit/loss from sales (using simplified average cost basis).
@@ -23,7 +26,7 @@ The database consists of the following tables. See `database/schema.sql` for ful
     *   `transaction_id` (PK), `stock_id` (FK), `transaction_type` (BUY/SELL), `quantity`, `price_per_share`, `transaction_date`
 *   `portfolio_holdings`: A snapshot of currently owned stocks, their quantities, and average buy prices.
     *   `holding_id` (PK), `stock_id` (FK), `quantity_held`, `average_buy_price`, `last_updated`
-*   `current_prices`: Stores (simulated) current market prices for stocks to value the portfolio.
+*   `current_prices`: Stores current market prices for stocks, updated via API.
     *   `price_id` (PK), `stock_id` (FK), `current_price`, `last_updated`
 
 ## Setup & Usage
@@ -34,33 +37,48 @@ The database consists of the following tables. See `database/schema.sql` for ful
     cd Stock-Portfolio-Tracker
     ```
 
-2.  **Database Setup:**
-    *   Choose your preferred SQL database system (e.g., PostgreSQL, MySQL, SQLite).
-    *   Connect to your database server/instance.
-    *   Execute the `database/schema.sql` script to create all necessary tables:
-        ```sql
-        -- Example for psql (PostgreSQL)
-        -- \i path/to/Stock-Portfolio-Tracker/database/schema.sql 
-        -- Example for SQLite CLI
-        -- .read path/to/Stock-Portfolio-Tracker/database/schema.sql
+2.  **Get an Alpha Vantage API Key:**
+    *   This project uses the Alpha Vantage API to fetch real-time stock prices.
+    *   Go to [https://www.alphavantage.co/support/#api-key](https://www.alphavantage.co/support/#api-key) and claim your free API key.
+
+3.  **Set Environment Variable for API Key:**
+    *   The application expects your Alpha Vantage API key to be set as an environment variable named `ALPHA_VANTAGE_API_KEY`.
+    *   **For Linux/macOS (in your terminal for the current session):**
+        ```bash
+        export ALPHA_VANTAGE_API_KEY='YOUR_ACTUAL_API_KEY'
+        ```
+    *   **For Windows (Command Prompt for the current session):**
+        ```bash
+        set ALPHA_VANTAGE_API_KEY=YOUR_ACTUAL_API_KEY
+        ```
+    *   For persistent storage, you would add this to your shell's configuration file (e.g., `.bashrc`, `.zshrc`, or system environment variables).
+    *   **Important:** Do not commit your API key directly into the code or your Git repository.
+
+4.  **Install Dependencies:**
+    *   Make sure you have Python 3 and pip installed.
+    *   Navigate to the project directory in your terminal and run:
+        ```bash
+        pip install -r requirements.txt 
+        # or pip3 install -r requirements.txt
         ```
 
-3.  **Populate with Sample Data (Recommended for Testing):**
-    *   Execute the `database/sample_data.sql` script to populate the tables with a set of stocks, transactions, holdings, and current prices.
-        ```sql
-        -- Example for psql (PostgreSQL)
-        -- \i path/to/Stock-Portfolio-Tracker/database/sample_data.sql
-        -- Example for SQLite CLI
-        -- .read path/to/Stock-Portfolio-Tracker/database/sample_data.sql
-        ```
+5.  **Database Setup:**
+    *   The application uses a SQLite database file (`database/stock_portfolio.db`).
+    *   This database will be automatically created and initialized with schema (from `database/schema.sql`) and sample data (from `database/sample_data.sql`) the first time you run the Flask app.
+    *   The sample data for `current_prices` might be initially populated but will be overwritten by the API updates.
 
-4.  **Explore Queries:**
-    *   The `queries/common_queries.sql` file contains a variety of useful SQL queries to interact with the database. You can run these in your SQL client to:
-        *   Add new stocks and transactions.
-        *   View current holdings and their market values.
-        *   Calculate total portfolio value.
-        *   Analyze profit and loss.
-    *   **Important Note on `portfolio_holdings`:** The `sample_data.sql` script pre-calculates the `portfolio_holdings` based on its transactions. In a real application, you would need application logic or database triggers/procedures to automatically update `portfolio_holdings` after each BUY or SELL transaction. The `common_queries.sql` file includes commented-out examples and notes on how to perform these updates manually.
+6.  **Run the Flask Application:**
+    *   In your terminal, from the project directory (`Stock-Portfolio-Tracker`), run:
+        ```bash
+        python app.py
+        # or python3 app.py
+        ```
+    *   The terminal will show the application running, usually on `http://127.0.0.1:5000/`.
+
+7.  **Access in Browser:**
+    *   Open your web browser and go to `http://127.0.0.1:5000/`.
+    *   You should see the portfolio overview. You can navigate to "Transaction History".
+    *   If your API key is correctly set, you can use the "Update All Stock Prices" button on the Portfolio Overview page to fetch the latest prices.
 
 ## Example Workflow (Manual Updates shown in `common_queries.sql`)
 

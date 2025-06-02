@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - Stock Portfolio Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Stock Portfolio Tracker</h1>
+            <nav>
+                <a href="{{ url_for('index') }}">Portfolio Overview</a>
+                <a href="{{ url_for('transactions_history') }}" class="active">Transaction History</a>
+            </nav>
+        </header>
+
+        <section class="transactions">
+            <h2>All Transactions</h2>
+            {% if transactions %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Symbol</th>
+                            <th>Company</th>
+                            <th>Type</th>
+                            <th>Quantity</th>
+                            <th>Price/Share</th>
+                            <th>Total Cost/Proceeds</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trxn in transactions %}
+                        <tr>
+                            <td>{{ trxn.transaction_date }}</td>
+                            <td>{{ trxn.symbol }}</td>
+                            <td>{{ trxn.company_name }}</td>
+                            <td class="{% if trxn.transaction_type == 'BUY' %}buy-type{% else %}sell-type{% endif %}">
+                                {{ trxn.transaction_type }}
+                            </td>
+                            <td>{{ trxn.quantity }}</td>
+                            <td>${{ "%.2f"|format(trxn.price_per_share) }}</td>
+                            <td>${{ "%.2f"|format(trxn.total_cost) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No transactions to display.</p>
+            {% endif %}
+        </section>
+
+        <footer>
+            <p>Stock Portfolio Tracker - Powered by SQL & Flask</p>
+        </footer>
+    </div>
+</body>
+</html> 

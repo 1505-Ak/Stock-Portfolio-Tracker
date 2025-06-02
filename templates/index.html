@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Portfolio Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Stock Portfolio Tracker</h1>
+            <nav>
+                <a href="{{ url_for('index') }}" class="active">Portfolio Overview</a>
+                <a href="{{ url_for('transactions_history') }}">Transaction History</a>
+            </nav>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="actions">
+            {% if api_key_set %}
+                <form action="{{ url_for('update_prices') }}" method="POST">
+                    <button type="submit" class="button-primary">Update All Stock Prices</button>
+                </form>
+            {% else %}
+                <p class="api-key-warning">ALPHA_VANTAGE_API_KEY is not set. Price updates are disabled.</p>
+            {% endif %}
+        </section>
+
+        <section class="summary">
+            <h2>Portfolio Summary</h2>
+            <div class="summary-item">
+                <span>Total Portfolio Value:</span>
+                <span class="value">${{ "%.2f"|format(total_portfolio_value) if total_portfolio_value else '0.00' }}</span>
+            </div>
+            <div class="summary-item">
+                <span>Total Unrealized P/L:</span>
+                <span class="value {% if total_unrealized_pnl >= 0 %}profit{% else %}loss{% endif %}">
+                    ${{ "%.2f"|format(total_unrealized_pnl) if total_unrealized_pnl else '0.00' }}
+                </span>
+            </div>
+        </section>
+
+        <section class="holdings">
+            <h2>Current Holdings</h2>
+            {% if holdings %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Company</th>
+                            <th>Quantity</th>
+                            <th>Avg. Buy Price</th>
+                            <th>Current Price</th>
+                            <th>Price Last Updated</th>
+                            <th>Current Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for holding in holdings %}
+                        <tr>
+                            <td>{{ holding.symbol }}</td>
+                            <td>{{ holding.company_name }}</td>
+                            <td>{{ holding.quantity_held }}</td>
+                            <td>${{ "%.2f"|format(holding.average_buy_price) }}</td>
+                            <td>${{ "%.2f"|format(holding.current_market_price) if holding.current_market_price is not none else 'N/A' }}</td>
+                            <td>{{ holding.price_last_updated.strftime('%Y-%m-%d %H:%M:%S') if holding.price_last_updated else 'N/A' }}</td>
+                            <td>${{ "%.2f"|format(holding.current_total_value) if holding.current_total_value is not none else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No holdings to display.</p>
+            {% endif %}
+        </section>
+
+        <footer>
+            <p>Stock Portfolio Tracker - Powered by SQL & Flask</p>
+        </footer>
+    </div>
+</body>
+</html> 
